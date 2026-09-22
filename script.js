@@ -174,7 +174,7 @@ const Auth = {
       else window.location.href = "admin.html";
     } else {
       Store.remove("session");
-      if (window.IS_ADMIN_PAGE) window.location.href = "Index.html";
+      if (window.IS_ADMIN_PAGE) window.location.href = "index.html";
       else App.showLogin();
     }
     const loginForm = document.getElementById("login-form");
@@ -214,7 +214,7 @@ const Auth = {
     Store.remove("session");
     Polling.stop();
     if (window.IS_ADMIN_PAGE) {
-      window.location.href = "Index.html";
+      window.location.href = "index.html";
     } else {
       Toast.info("You have been logged out.");
       App.showLogin();
@@ -224,7 +224,7 @@ const Auth = {
     STATE.session = null;
     Store.remove("session");
     Polling.stop();
-    if (window.IS_ADMIN_PAGE) window.location.href = "Index.html";
+    if (window.IS_ADMIN_PAGE) window.location.href = "index.html";
   }
 };
 
