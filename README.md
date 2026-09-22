@@ -20,7 +20,7 @@ This system is used by an **Administrator** to:
 Make sure these files are in the same folder:
 
 ```text
-Index.html
+index.html
 admin.html
 script.js
 style.css
@@ -28,7 +28,7 @@ Code-1.gs
 README.md
 ```
 
-Do not separate `Index.html`, `admin.html`, `script.js`, and `style.css`. They must stay together for the login page and dashboard to work.
+Do not separate `index.html`, `admin.html`, `script.js`, and `style.css`. They must stay together for the login page and dashboard to work.
 
 ---
 
@@ -157,7 +157,7 @@ admin
 7. Enter:
 
 ```text
-admin12345
+admin@123
 ```
 
 8. Click **OK**.
@@ -254,11 +254,11 @@ Save `script.js`.
 
 ## Step 8: Open the login page
 
-1. In the VS Code Explorer, right-click `Index.html`.
+1. In the VS Code Explorer, right-click `index.html`.
 2. Select **Open with Live Server** if you have the Live Server extension.
-3. If you do not have Live Server, you can double-click `Index.html`.
+3. If you do not have Live Server, you can double-click `index.html`.
 
-`Index.html` is the login page.
+`index.html` is the login page.
 
 Enter:
 
@@ -269,11 +269,51 @@ Password: admin@123
 
 After a successful login, the system automatically opens the Admin dashboard in `admin.html`.
 
+## If you are using GitHub Pages
+
+GitHub Pages requires the homepage filename to be exactly:
+
+```text
+index.html
+```
+
+The filename is case-sensitive. `Index.html` with a capital `I` can cause a 404 error on GitHub Pages.
+
+In your GitHub repository, make sure these files are in the repository root, not inside another folder:
+
+```text
+index.html
+admin.html
+script.js
+style.css
+```
+
+If your repository currently contains `Index.html`, open that file on GitHub, click the pencil **Edit** button, change the filename to lowercase `index.html`, then click **Commit changes**. Alternatively, rename it in VS Code using **Rename** or `F2` before uploading it again.
+
+Then check GitHub Pages:
+
+1. Open the repository on GitHub.
+2. Go to **Settings**.
+3. Open **Pages**.
+4. Under **Build and deployment**, choose **Deploy from a branch**.
+5. Select the branch containing the files, usually `main`.
+6. Select the folder `/ (root)`.
+7. Click **Save**.
+8. Wait a few minutes, then open the Pages URL again.
+
+The URL should look like this:
+
+```text
+https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/
+```
+
+Do not add `Index.html` to the URL. GitHub Pages will automatically load the lowercase `index.html` file.
+
 ## Project files and their purpose
 
 | File | Purpose |
 |---|---|
-| `Index.html` | Login page only |
+| `index.html` | Login page only |
 | `admin.html` | Protected Admin dashboard |
 | `script.js` | Frontend logic and API connection |
 | `style.css` | Design and responsive layout |
@@ -396,7 +436,7 @@ This means the login token has expired.
 
 Do this:
 
-1. Return to `Index.html`.
+1. Return to `index.html`.
 2. Log in again.
 3. If it happens repeatedly, create a new Apps Script deployment version.
 
@@ -453,7 +493,7 @@ Make sure the password was created using `setupAdminAccount()` and that the user
 
 Use this checklist after setup:
 
-- [ ] `Index.html` opens as the login page.
+- [ ] `index.html` opens as the login page.
 - [ ] Admin login works.
 - [ ] The system opens `admin.html` after login.
 - [ ] The dashboard cannot be opened without login.
@@ -480,6 +520,6 @@ The correct process is:
 
 1. Run `setupAdminAccount()`.
 2. Enter the credentials in the dialogs.
-3. Log in through `Index.html`.
+3. Log in through `index.html`.
 
 The backend checks the Admin role. Even if a user can see the frontend files, they cannot access protected data without a valid Admin session.
