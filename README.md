@@ -1,23 +1,23 @@
 # School Enrollment and Grading Management System
 
-## Para saan ang system na ito?
+## What is this system?
 
-Ang system na ito ay ginagamit ng **Admin** para sa:
+This system is used by an **Administrator** to:
 
-- pagdagdag at pag-edit ng student
-- pag-aayos ng school sections
-- paglipat ng student sa ibang section
-- paglalagay ng grades
-- pag-save ng school settings
-- pagtingin ng dashboard
+- add and edit students
+- manage school sections
+- transfer students between sections
+- enter grades
+- update school settings
+- view dashboard statistics
 
-**Mahalaga:** Admin lamang ang puwedeng mag-login. Walang public registration para sa students. Ang student ay idinadagdag ng Admin mula sa dashboard.
+**Important:** Only Admin users can log in. There is no public student registration. Students are added by the Admin from the dashboard.
 
 ---
 
-# PART 1: Ihanda ang mga files
+# Part 1: Prepare the project files
 
-Siguraduhing magkakasama sa iisang folder ang mga file na ito:
+Make sure these files are in the same folder:
 
 ```text
 Index.html
@@ -28,95 +28,96 @@ Code-1.gs
 README.md
 ```
 
-Huwag paghiwa-hiwalayin ang `Index.html`, `admin.html`, `script.js`, at `style.css`. Kailangan magkakasama ang mga ito para gumana ang login at dashboard.
+Do not separate `Index.html`, `admin.html`, `script.js`, and `style.css`. They must stay together for the login page and dashboard to work.
 
 ---
 
-# PART 2: Gumawa ng Google Spreadsheet
+# Part 2: Create the Google Spreadsheet
 
-## Step 1: Gumawa ng spreadsheet
+## Step 1: Create a spreadsheet
 
-1. Buksan ang [Google Sheets](https://sheets.google.com).
-2. Piliin ang **Blank spreadsheet**.
-3. Palitan ang pangalan, halimbawa:
+1. Open [Google Sheets](https://sheets.google.com).
+2. Select **Blank spreadsheet**.
+3. Rename it, for example:
 
 ```text
 SEMS Database
 ```
 
-4. Kopyahin ang Spreadsheet ID mula sa URL.
+4. Copy the Spreadsheet ID from the URL.
 
-Halimbawa ang URL ay:
+For example, if the URL is:
 
 ```text
 https://docs.google.com/spreadsheets/d/1ABCxyz123456/edit
 ```
 
-Ang Spreadsheet ID ay:
+The Spreadsheet ID is:
 
 ```text
 1ABCxyz123456
 ```
 
-Itago muna ang ID dahil gagamitin ito sa Apps Script.
+Keep this ID. You will use it in Apps Script.
 
 ---
 
-# PART 3: Ilagay ang backend sa Apps Script
+# Part 3: Add the backend to Apps Script
 
-## Step 2: Buksan ang Apps Script
+## Step 2: Open Apps Script
 
-1. Sa loob ng Google Spreadsheet, i-click ang **Extensions**.
-2. Piliin ang **Apps Script**.
-3. May bubukas na bagong tab na Apps Script.
-4. Sa kaliwang bahagi, buksan ang file na `Code.gs`.
-5. Burahin ang lahat ng default code.
-6. Sa VS Code, buksan ang file na `Code-1.gs`.
-7. Kopyahin ang buong laman ng `Code-1.gs`.
-8. I-paste ito sa `Code.gs` sa Apps Script.
+1. Open the Google Spreadsheet.
+2. Click **Extensions**.
+3. Select **Apps Script**.
+4. A new Apps Script tab will open.
+5. On the left side, open the file named `Code.gs`.
+6. Delete all of the default code.
+7. In VS Code, open `Code-1.gs`.
+8. Copy the entire contents of `Code-1.gs`.
+9. Paste it into `Code.gs` in Apps Script.
 
-## Step 3: Ilagay ang Spreadsheet ID
+## Step 3: Add the Spreadsheet ID
 
-Hanapin ang linyang ito sa Apps Script:
+Find this line in Apps Script:
 
 ```javascript
 const SPREADSHEET_ID = "PASTE_YOUR_SPREADSHEET_ID_HERE";
 ```
 
-Palitan ito ng tunay na Spreadsheet ID.
+Replace it with your real Spreadsheet ID.
 
-Halimbawa:
+Example:
 
 ```javascript
 const SPREADSHEET_ID = "1ABCxyz123456";
 ```
 
-**Huwag ilagay ang buong URL. ID lamang ang ilagay.**
+**Do not paste the full spreadsheet URL. Paste only the ID.**
 
-8. I-click ang **Save**.
+10. Click **Save**.
 
 ---
 
-# PART 4: Automatic na gumawa ng sheets at headers
+# Part 4: Automatically create the sheets and headers
 
-## Step 4: Run ang setupSpreadsheet
+## Step 4: Run `setupSpreadsheet`
 
-1. Sa Apps Script editor, hanapin ang function dropdown sa taas.
-2. Piliin ang:
+1. In the Apps Script editor, find the function dropdown at the top.
+2. Select:
 
 ```text
 setupSpreadsheet
 ```
 
-3. I-click ang **Run**.
-4. Kapag may permission prompt:
-   - i-click ang **Review permissions**
-   - piliin ang Google account mo
-   - i-click ang **Advanced** kung lumabas
-   - i-click ang **Go to project name**
-   - i-click ang **Allow**
+3. Click **Run**.
+4. If Google asks for permission:
+   - click **Review permissions**
+   - select your Google account
+   - click **Advanced** if it appears
+   - click **Go to project name**
+   - click **Allow**
 
-Pagkatapos tumakbo, automatic na gagawa ang function ng mga sheet na ito:
+After the function finishes, it automatically creates these sheets:
 
 ```text
 Users
@@ -127,41 +128,41 @@ Settings
 ActivityLogs
 ```
 
-Automatic din nitong ilalagay ang headers sa bawat sheet.
+It also adds the required headers to each sheet.
 
-**Hindi nito buburahin ang existing data.**
+**It does not delete existing data.**
 
 ---
 
-# PART 5: Gumawa ng Admin account
+# Part 5: Create the Admin account
 
-## Step 5: Run ang setupAdminAccount
+## Step 5: Run `setupAdminAccount`
 
-1. Sa Apps Script function dropdown, piliin:
+1. In the Apps Script function dropdown, select:
 
 ```text
 setupAdminAccount
 ```
 
-2. I-click ang **Run**.
-3. May lalabas na dialog para sa username.
-4. Ilagay:
+2. Click **Run**.
+3. A dialog will ask for the username.
+4. Enter:
 
 ```text
 admin
 ```
 
-5. I-click ang **OK**.
-6. May lalabas na dialog para sa password.
-7. Ilagay:
+5. Click **OK**.
+6. A second dialog will ask for the password.
+7. Enter:
 
 ```text
 admin@123
 ```
 
-8. I-click ang **OK**.
+8. Click **OK**.
 
-Automatic na gagawa ito ng Admin row sa `Users` sheet:
+The function automatically creates an Admin row in the `Users` sheet:
 
 ```text
 Username: admin
@@ -169,13 +170,13 @@ Role: Admin
 Status: Active
 ```
 
-Ang password ay hindi ise-save bilang plain text. Password hash lamang ang ilalagay sa `PasswordHash` column.
+The password is not stored as plain text. Only the password hash is stored in the `PasswordHash` column.
 
-## Kapag sinabi na existing na ang username
+## If the username already exists
 
-Ibig sabihin mayroon nang `admin` account. Huwag ulit gumawa ng duplicate account.
+This means an `admin` account already exists. Do not create a duplicate account.
 
-Puwede mong tingnan ang `Users` sheet at siguraduhing ganito ang values:
+Open the `Users` sheet and check that the account contains:
 
 ```text
 Role: Admin
@@ -184,157 +185,157 @@ Status: Active
 
 ---
 
-# PART 6: I-deploy ang backend bilang Web App
+# Part 6: Deploy the backend as a Web App
 
-## Step 6: Gumawa ng deployment
+## Step 6: Create a deployment
 
-1. Sa Apps Script editor, i-click ang **Deploy**.
-2. Piliin ang **New deployment**.
-3. Sa **Select type**, piliin ang **Web app**.
-4. Sa **Execute as**, piliin:
+1. In the Apps Script editor, click **Deploy**.
+2. Select **New deployment**.
+3. Under **Select type**, select **Web app**.
+4. Under **Execute as**, select:
 
 ```text
 Me
 ```
 
-5. Sa **Who has access**, piliin:
+5. Under **Who has access**, select:
 
 ```text
 Anyone
 ```
 
-6. I-click ang **Deploy**.
-7. I-approve ang permissions kung hihingin.
-8. Kopyahin ang **Web app URL**.
+6. Click **Deploy**.
+7. Approve the permissions if requested.
+8. Copy the **Web app URL**.
 
-Ang URL ay karaniwang ganito ang format:
+The URL usually looks like this:
 
 ```text
 https://script.google.com/macros/s/ABC123/exec
 ```
 
-**Kopyahin ang buong URL hanggang `/exec`.**
+**Copy the complete URL, including `/exec`.**
 
 ---
 
-# PART 7: Ilagay ang API URL sa frontend
+# Part 7: Add the API URL to the frontend
 
-## Step 7: Buksan ang script.js
+## Step 7: Open `script.js`
 
-Sa VS Code, buksan ang `script.js`.
+In VS Code, open `script.js`.
 
-Hanapin ang:
+Find:
 
 ```javascript
 API_URL: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE",
 ```
 
-Palitan ito ng Web app URL.
+Replace it with the Web app URL.
 
-Halimbawa:
+Example:
 
 ```javascript
 API_URL: "https://script.google.com/macros/s/ABC123/exec",
 ```
 
-Siguraduhin ang mga sumusunod:
+Check the following:
 
-- may `https://`
-- nagtatapos sa `/exec`
-- walang extra space
-- walang backtick o extra quotation mark
-- tama ang deployment URL
+- it starts with `https://`
+- it ends with `/exec`
+- there are no extra spaces
+- there are no extra backticks or quotation marks
+- it is the correct deployment URL
 
-I-save ang `script.js`.
+Save `script.js`.
 
 ---
 
-# PART 8: I-open ang system
+# Part 8: Open the system
 
-## Step 8: Buksan ang login page
+## Step 8: Open the login page
 
-1. Sa VS Code Explorer, i-right-click ang `Index.html`.
-2. Piliin ang **Open with Live Server** kung mayroon kang Live Server extension.
-3. Kung wala, puwedeng i-double-click ang `Index.html`.
+1. In the VS Code Explorer, right-click `Index.html`.
+2. Select **Open with Live Server** if you have the Live Server extension.
+3. If you do not have Live Server, you can double-click `Index.html`.
 
-Ang `Index.html` ang login page.
+`Index.html` is the login page.
 
-Ilagay:
+Enter:
 
 ```text
 Username: admin
 Password: admin@123
 ```
 
-Pag tama ang credentials, automatic kang mapupunta sa `admin.html` dashboard.
+After a successful login, the system automatically opens the Admin dashboard in `admin.html`.
 
-## Mga file at gamit nila
+## Project files and their purpose
 
-| File | Gamit |
+| File | Purpose |
 |---|---|
-| `Index.html` | Login page lamang |
+| `Index.html` | Login page only |
 | `admin.html` | Protected Admin dashboard |
-| `script.js` | Frontend logic at API connection |
-| `style.css` | Design at responsive layout |
-| `Code-1.gs` | Backend at Google Sheets connection |
+| `script.js` | Frontend logic and API connection |
+| `style.css` | Design and responsive layout |
+| `Code-1.gs` | Backend and Google Sheets connection |
 
 ---
 
-# PART 9: Paano gamitin ang Admin Dashboard
+# Part 9: Use the Admin Dashboard
 
 ## Dashboard
 
-Makikita rito ang:
+The Dashboard shows:
 
 - total students
 - total enrolled students
 - total sections
-- students na may grades
-- students na walang grades
+- students with grades
+- students without grades
 
 ## Enrollment
 
-1. I-click ang **Enrollment**.
-2. I-click ang **Add Student**.
-3. Punan ang required fields:
+1. Click **Enrollment**.
+2. Click **Add Student**.
+3. Complete the required fields:
    - Student ID
    - Last Name
    - First Name
    - Gender
    - School Section
-4. I-click ang **Save Student**.
+4. Click **Save Student**.
 
-Ang duplicate Student ID ay hindi tatanggapin.
+Duplicate Student IDs are rejected.
 
 ## School Sections
 
-1. I-click ang **School Sections**.
-2. Para gumawa ng section, i-click ang **Add Section**.
-3. Ilagay ang:
+1. Click **School Sections**.
+2. To create a section, click **Add Section**.
+3. Enter:
    - Grade Level
    - Section Name
-4. I-click ang **Create Section**.
+4. Click **Create Section**.
 
-Para mag-edit:
+To edit a section:
 
-1. Hanapin ang section card.
-2. I-click ang **Edit**.
-3. Baguhin ang Grade Level o Section Name.
-4. I-click ang **Save Changes**.
+1. Find the section card.
+2. Click **Edit**.
+3. Change the Grade Level or Section Name.
+4. Click **Save Changes**.
 
-Para mag-remove:
+To remove a section:
 
-- Kung walang student at grade record ang section, mabubura ito.
-- Kung may student o historical grade, magiging `Inactive` ito para hindi masira ang records.
+- If the section has no students or grade records, it is permanently deleted.
+- If the section has students or historical grades, it is changed to `Inactive` so existing records are not broken.
 
 ## Grading
 
-1. I-click ang **Grading**.
-2. Pumili ng school section.
-3. Ilagay ang grades mula `0` hanggang `100`.
-4. I-click ang **Save Grades**.
+1. Click **Grading**.
+2. Select a school section.
+3. Enter grades from `0` to `100`.
+4. Click **Save Grades**.
 
-Automatic na makikita ang:
+The system automatically displays:
 
 - Average
 - Passed
@@ -344,99 +345,99 @@ Automatic na makikita ang:
 
 ## Settings
 
-1. I-click ang **Settings**.
-2. Baguhin ang system title, school name, school year, semester, subjects, o passing grade.
-3. I-click ang **Save Settings**.
-4. Hintayin ang success message.
+1. Click **Settings**.
+2. Change the system title, school name, school year, semester, subjects, or passing grade.
+3. Click **Save Settings**.
+4. Wait for the success message.
 
-Kung hindi nag-save, tingnan ang troubleshooting section sa ibaba.
+If the settings do not save, see the troubleshooting section below.
 
 ## Logout
 
-I-click ang **Logout** para bumalik sa login page.
+Click **Logout** to return to the login page.
 
 ---
 
-# PART 10: Kapag nag-edit ng Code.gs
+# Part 10: What to do after editing `Code-1.gs`
 
-Kapag may binago ka sa `Code-1.gs`, hindi agad mababago ang live Web App.
+Changes to `Code-1.gs` do not automatically update the live Web App.
 
-Gawin ito bawat may backend update:
+Do these steps every time you change the backend:
 
-1. Kopyahin ulit ang updated `Code-1.gs` sa Apps Script `Code.gs`.
-2. I-click ang **Save**.
-3. I-click ang **Deploy**.
-4. Piliin ang **Manage deployments**.
-5. I-click ang **Edit** pencil icon.
-6. Sa **Version**, piliin ang **New version**.
-7. I-click ang **Deploy**.
-8. Panatilihin ang parehong Web app URL.
-9. I-refresh ang browser gamit ang `Ctrl + F5`.
+1. Copy the updated `Code-1.gs` into `Code.gs` in Apps Script.
+2. Click **Save**.
+3. Click **Deploy**.
+4. Select **Manage deployments**.
+5. Click the pencil **Edit** icon.
+6. Under **Version**, select **New version**.
+7. Click **Deploy**.
+8. Keep using the same Web app URL.
+9. Refresh the browser with `Ctrl + F5`.
 
-Kung hindi gumawa ng bagong version, maaaring luma pa rin ang ginagamit ng website.
+If you do not create a new version, the website may continue using the old backend code.
 
 ---
 
-# PART 11: Troubleshooting
+# Part 11: Troubleshooting
 
-## Problema: `API_URL is not configured yet`
+## Problem: `API_URL is not configured yet`
 
-Ayusin ito:
+Fix it as follows:
 
-1. Buksan ang `script.js`.
-2. Tingnan ang `API_URL`.
-3. Palitan ang placeholder ng tunay na Web app URL.
-4. I-save.
-5. I-refresh gamit ang `Ctrl + F5`.
+1. Open `script.js`.
+2. Find `API_URL`.
+3. Replace the placeholder with the real Web app URL.
+4. Save the file.
+5. Refresh the page with `Ctrl + F5`.
 
-## Problema: `Session expired`
+## Problem: `Session expired`
 
-Ibig sabihin expired na ang login token.
+This means the login token has expired.
 
-Gawin ito:
+Do this:
 
-1. Bumalik sa `Index.html`.
-2. Mag-login ulit.
-3. Kung paulit-ulit, gumawa ng bagong Apps Script deployment version.
+1. Return to `Index.html`.
+2. Log in again.
+3. If it happens repeatedly, create a new Apps Script deployment version.
 
-## Problema: `Offline (cached)`
+## Problem: `Offline (cached)`
 
-Posibleng dahilan:
+Possible causes:
 
-- mali ang API URL
-- luma ang deployment
-- hindi naka-`Anyone` ang Web App access
-- hindi naka-run ang `setupSpreadsheet`
-- expired ang session
-- may internet problem
+- the API URL is incorrect
+- the deployment is outdated
+- Web App access is not set to `Anyone`
+- `setupSpreadsheet` was not run
+- the session has expired
+- there is an internet connection problem
 
-## Problema: Hindi nagse-save ang Settings
+## Problem: Settings do not save
 
-Suriin ang mga ito:
+Check the following:
 
-1. Naka-login bilang Admin.
-2. `Role` sa `Users` sheet ay `Admin`.
-3. `Status` ay `Active`.
-4. Tama ang API URL.
-5. Na-redeploy ang latest `Code.gs`.
-6. I-refresh ang page gamit ang `Ctrl + F5`.
+1. You are logged in as an Admin.
+2. The `Role` in the `Users` sheet is `Admin`.
+3. The `Status` is `Active`.
+4. The API URL is correct.
+5. The latest `Code.gs` was redeployed.
+6. Refresh the page with `Ctrl + F5`.
 
-## Problema: `Unknown action: removeSection`
+## Problem: `Unknown action: removeSection`
 
-Luma pa ang Apps Script deployment.
+The Apps Script deployment is outdated.
 
-Gawin:
+Do this:
 
-1. I-paste ang latest `Code-1.gs`.
-2. Save.
-3. Deploy → Manage deployments.
-4. Edit deployment.
-5. Piliin ang **New version**.
-6. Deploy ulit.
+1. Paste the latest `Code-1.gs` into Apps Script.
+2. Click **Save**.
+3. Go to **Deploy → Manage deployments**.
+4. Edit the deployment.
+5. Select **New version**.
+6. Deploy again.
 
-## Problema: Hindi gumagana ang login
+## Problem: Login does not work
 
-Suriin ang `Users` sheet:
+Check the `Users` sheet:
 
 ```text
 Username: admin
@@ -444,41 +445,41 @@ Role: Admin
 Status: Active
 ```
 
-Siguraduhing ang password ay ginawa gamit ang `setupAdminAccount()` at tama ang spelling ng username.
+Make sure the password was created using `setupAdminAccount()` and that the username is spelled correctly.
 
 ---
 
-# PART 12: Basic testing checklist
+# Part 12: Basic testing checklist
 
-Gamitin ito pagkatapos ng setup:
+Use this checklist after setup:
 
-- [ ] Nagbubukas ang `Index.html` bilang login page.
-- [ ] Gumagana ang Admin login.
-- [ ] Napupunta sa `admin.html` pagkatapos mag-login.
-- [ ] Hindi nabubuksan ang dashboard kapag walang login.
-- [ ] Lumalabas ang Dashboard.
-- [ ] Nakakapagdagdag ng student.
-- [ ] Nare-reject ang duplicate Student ID.
-- [ ] Nakakapagdagdag ng section.
-- [ ] Nakakapag-edit ng section.
-- [ ] Nakaka-remove ng empty section.
-- [ ] Na-a-archive ang section na may student o grades.
-- [ ] Nakakapaglagay ng grades.
-- [ ] Nare-reject ang grade na mas mababa sa 0 o higit sa 100.
-- [ ] Nakakapag-save ng Settings.
-- [ ] Gumagana ang Logout.
-- [ ] Hindi nakakapasok ang non-Admin account.
+- [ ] `Index.html` opens as the login page.
+- [ ] Admin login works.
+- [ ] The system opens `admin.html` after login.
+- [ ] The dashboard cannot be opened without login.
+- [ ] The Dashboard loads.
+- [ ] A student can be added.
+- [ ] Duplicate Student IDs are rejected.
+- [ ] A section can be added.
+- [ ] A section can be edited.
+- [ ] An empty section can be removed.
+- [ ] A section with students or grades is archived.
+- [ ] Grades can be entered.
+- [ ] Grades below 0 or above 100 are rejected.
+- [ ] Settings can be saved.
+- [ ] Logout works.
+- [ ] Non-Admin users cannot log in.
 
 ---
 
 # Important security reminder
 
-Huwag ilagay ang Admin password sa `Code-1.gs` o sa frontend files.
+Do not put the Admin password in `Code-1.gs` or in the frontend files.
 
-Ang tamang proseso ay:
+The correct process is:
 
 1. Run `setupAdminAccount()`.
-2. Ilagay ang credentials sa dialog.
-3. Mag-login sa `Index.html`.
+2. Enter the credentials in the dialogs.
+3. Log in through `Index.html`.
 
-Ang backend ang nagche-check ng Admin role. Kahit makita ng user ang frontend files, hindi siya makakakuha ng protected data nang walang valid Admin session.
+The backend checks the Admin role. Even if a user can see the frontend files, they cannot access protected data without a valid Admin session.
