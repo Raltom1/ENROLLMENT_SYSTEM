@@ -210,6 +210,8 @@ const Auth = {
     btn.querySelector(".spinner").hidden = !loading;
   },
   logout() {
+    const confirmed = window.confirm("Are you sure you want to log out?");
+    if (!confirmed) return;
     STATE.session = null;
     Store.remove("session");
     Polling.stop();
