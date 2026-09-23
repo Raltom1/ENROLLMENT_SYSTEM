@@ -265,7 +265,7 @@ Enter:
 
 ```text
 Username: admin
-Password: admin@123
+Password: admin12345
 ```
 
 After a successful login, the system automatically opens the Admin dashboard in `admin.html`.
