@@ -158,7 +158,7 @@ admin
 7. Enter:
 
 ```text
-admin@123
+admin12345
 ```
 
 8. Click **OK**.
