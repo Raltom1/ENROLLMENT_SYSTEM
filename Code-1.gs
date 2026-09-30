@@ -20,16 +20,20 @@ const SHEETS = {
   SECTIONS: "Sections",
   GRADES: "Grades",
   SETTINGS: "Settings",
-  LOGS: "ActivityLogs"
+  LOGS: "ActivityLogs",
+  REQUESTS: "EnrollmentRequests",
+  ANNOUNCEMENTS: "Announcements"
 };
 
 const SHEET_HEADERS = {
-  Users: ["UserID", "Username", "PasswordHash", "Role", "Status", "CreatedAt"],
-  Students: ["StudentID", "LastName", "FirstName", "MiddleName", "Gender", "DateOfBirth", "ContactNumber", "Address", "SectionID", "Status", "CreatedAt", "UpdatedAt"],
+  Users: ["UserID", "Username", "PasswordHash", "Role", "Status", "StudentID", "CreatedAt"],
+  Students: ["StudentID", "LastName", "FirstName", "MiddleName", "Gender", "DateOfBirth", "ContactNumber", "Address", "SectionID", "Status", "UserID", "CreatedAt", "UpdatedAt"],
   Sections: ["SectionID", "SectionName", "GradeLevel", "Status", "CreatedAt", "UpdatedAt"],
   Grades: ["GradeID", "StudentID", "SectionID", "Subject", "Grade", "SchoolYear", "Semester", "UpdatedAt"],
   Settings: ["SettingID", "SystemTitle", "SchoolName", "SchoolYear", "Semester", "Subjects", "PassingGrade", "UpdatedAt"],
-  ActivityLogs: ["LogID", "UserID", "Action", "Description", "Timestamp"]
+  ActivityLogs: ["LogID", "UserID", "Action", "Description", "Timestamp"],
+  EnrollmentRequests: ["RequestID", "UserID", "StudentID", "LastName", "FirstName", "MiddleName", "Gender", "DateOfBirth", "ContactNumber", "Address", "Status", "SectionID", "SubmittedAt", "ReviewedAt", "ReviewedBy", "AdminNotes"],
+  Announcements: ["AnnouncementID", "SectionID", "Title", "Message", "ScheduleDate", "StartTime", "EndTime", "Location", "CreatedAt", "UpdatedAt"]
 };
 
 function getDatabaseSpreadsheet() {
@@ -54,6 +58,12 @@ function setupSpreadsheet() {
     if (!hasHeaders) {
       sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
       sheet.setFrozenRows(1);
+    } else {
+      const currentHeaders = firstRow.map(value => String(value).trim()).filter(Boolean);
+      const missingHeaders = headers.filter(header => currentHeaders.indexOf(header) === -1);
+      if (missingHeaders.length) {
+        sheet.getRange(1, sheet.getLastColumn() + 1, 1, missingHeaders.length).setValues([missingHeaders]);
+      }
     }
   });
 
@@ -136,20 +146,25 @@ function handleRequest(e) {
       token = e.parameter.token || null;
     }
 
-    const PUBLIC_ACTIONS = ["login"];
+    const PUBLIC_ACTIONS = ["login", "studentSignup"];
     if (PUBLIC_ACTIONS.indexOf(action) === -1) {
       session = validateToken(token);
       if (!session) return jsonResponse({ success: false, message: "Session expired. Please log in again." });
     }
 
-    const ADMIN_ACTIONS = ["getSnapshot", "getStudents", "addStudent", "updateStudent", "transferStudent", "getSections", "addSection", "updateSection", "removeSection", "getGrades", "saveGrades", "getSettings", "updateSettings"];
+    const ADMIN_ACTIONS = ["getSnapshot", "getStudents", "addStudent", "updateStudent", "transferStudent", "getSections", "addSection", "updateSection", "removeSection", "getGrades", "saveGrades", "getSettings", "updateSettings", "getAdminUsers", "getEnrollmentRequests", "reviewEnrollmentRequest", "resetUserPassword", "getAnnouncements", "saveAnnouncement", "removeAnnouncement"];
     if (ADMIN_ACTIONS.indexOf(action) !== -1 && session.role !== "Admin") {
       return jsonResponse({ success: false, message: "Administrator access is required." });
+    }
+    const STUDENT_ACTIONS = ["getStudentDashboard", "submitEnrollment"];
+    if (STUDENT_ACTIONS.indexOf(action) !== -1 && session.role !== "Student") {
+      return jsonResponse({ success: false, message: "Student account access is required." });
     }
 
     let data;
     switch (action) {
       case "login": data = actionLogin(payload); break;
+      case "studentSignup": data = actionStudentSignup(payload); break;
       case "getSnapshot": data = actionGetSnapshot(); break;
       case "getStudents": data = actionGetStudents(); break;
       case "addStudent": data = actionAddStudent(payload); break;
@@ -163,6 +178,15 @@ function handleRequest(e) {
       case "saveGrades": data = actionSaveGrades(payload); break;
       case "getSettings": data = actionGetSettings(); break;
       case "updateSettings": data = actionUpdateSettings(payload); break;
+      case "getAdminUsers": data = actionGetAdminUsers(); break;
+      case "getEnrollmentRequests": data = actionGetEnrollmentRequests(); break;
+      case "reviewEnrollmentRequest": data = actionReviewEnrollmentRequest(payload, session); break;
+      case "resetUserPassword": data = actionResetUserPassword(payload); break;
+      case "getStudentDashboard": data = actionGetStudentDashboard(session); break;
+      case "submitEnrollment": data = actionSubmitEnrollment(payload, session); break;
+      case "getAnnouncements": data = actionGetAnnouncements(); break;
+      case "saveAnnouncement": data = actionSaveAnnouncement(payload); break;
+      case "removeAnnouncement": data = actionRemoveAnnouncement(payload); break;
       default: return jsonResponse({ success: false, message: "Unknown action: " + action });
     }
     return jsonResponse({ success: true, message: "OK", data: data });
@@ -194,11 +218,16 @@ function sheetToObjects(sheet) {
   });
 }
 function appendRow(sheet, headers, obj) {
-  const row = headers.map(h => (obj[h] !== undefined ? obj[h] : ""));
+  const row = headers.map(h => safeSheetValue(obj[h] !== undefined ? obj[h] : ""));
   sheet.appendRow(row);
 }
+function safeSheetValue(value) {
+  return typeof value === "string" && /^[=+@-]/.test(value) ? "'" + value : value;
+}
 function getHeaders(sheet) {
-  return sheet.getDataRange().getValues()[0];
+  const lastColumn = sheet.getLastColumn();
+  if (lastColumn === 0) return [];
+  return sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
 }
 function findRowIndexByKey(sheet, keyColumn, keyValue) {
   const values = sheet.getDataRange().getValues();
@@ -215,7 +244,7 @@ function updateRowByKey(sheet, keyColumn, keyValue, updates) {
   const headers = getHeaders(sheet);
   headers.forEach((h, i) => {
     if (updates.hasOwnProperty(h)) {
-      sheet.getRange(rowNum, i + 1).setValue(updates[h]);
+      sheet.getRange(rowNum, i + 1).setValue(safeSheetValue(updates[h]));
     }
   });
   const updatedValues = sheet.getRange(rowNum, 1, 1, headers.length).getValues()[0];
@@ -262,12 +291,33 @@ function actionLogin(payload) {
   if (!username || !password) throw new Error("Username and password are required.");
   const users = sheetToObjects(getSheet(SHEETS.USERS));
   const user = users.find(u => String(u.Username).toLowerCase() === username.toLowerCase());
-  if (!user || String(user.Role || "").toLowerCase() !== "admin") throw new Error("Only administrator accounts can access this system.");
+  if (!user || !["admin", "student"].includes(String(user.Role || "").toLowerCase())) throw new Error("Invalid username or password.");
   if (user.Status && String(user.Status).toLowerCase() !== "active") throw new Error("This account is inactive.");
   if (hashPassword(password) !== user.PasswordHash) throw new Error("Invalid username or password.");
-  const token = createSession(user.Username, "Admin", user.UserID, "");
+  const role = String(user.Role).toLowerCase() === "admin" ? "Admin" : "Student";
+  const token = createSession(user.Username, role, user.UserID, user.StudentID || "");
   logActivity(user.UserID, "LOGIN", "Administrator logged in.");
-  return { username: user.Username, role: "Admin", token: token };
+  return { username: user.Username, role: role, token: token };
+}
+
+function actionStudentSignup(payload) {
+  const username = String(payload.username || "").trim();
+  const password = String(payload.password || "");
+  if (!/^[A-Za-z0-9._-]{3,30}$/.test(username)) throw new Error("Username must be 3-30 characters and use letters, numbers, dot, underscore, or hyphen.");
+  if (password.length < 8 || password.length > 128) throw new Error("Password must be between 8 and 128 characters.");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const usersSheet = getSheet(SHEETS.USERS);
+    const users = sheetToObjects(usersSheet);
+    if (users.some(user => String(user.Username).toLowerCase() === username.toLowerCase())) throw new Error("That username is already in use.");
+    const user = { UserID: newId("usr"), Username: username, PasswordHash: hashPassword(password), Role: "Student", Status: "Active", StudentID: "", CreatedAt: nowIso() };
+    appendRow(usersSheet, getHeaders(usersSheet), user);
+    logActivity(user.UserID, "STUDENT_SIGNUP", "Student account created.");
+    return { username: user.Username, role: "Student" };
+  } finally {
+    lock.releaseLock();
+  }
 }
 
 // ---------- SNAPSHOT (used by initial load + polling) ----------
@@ -276,7 +326,10 @@ function actionGetSnapshot() {
     students: actionGetStudents(),
     sections: actionGetSections(),
     grades: actionGetGrades(),
-    settings: actionGetSettings()
+    settings: actionGetSettings(),
+    adminUsers: actionGetAdminUsers(),
+    enrollmentRequests: actionGetEnrollmentRequests(),
+    announcements: actionGetAnnouncements()
   };
 }
 
@@ -286,34 +339,48 @@ function actionGetStudents() {
 }
 function actionAddStudent(payload) {
   const sheet = getSheet(SHEETS.STUDENTS);
-  const existing = sheetToObjects(sheet);
-  if (existing.some(s => String(s.StudentID) === String(payload.StudentID))) {
-    throw new Error("Student ID already exists.");
-  }
   if (!payload.StudentID || !payload.LastName || !payload.FirstName || !payload.SectionID) {
     throw new Error("Missing required student fields.");
   }
-  const sections = sheetToObjects(getSheet(SHEETS.SECTIONS));
-  if (!sections.some(sec => String(sec.SectionID) === String(payload.SectionID) && String(sec.Status || "Active").toLowerCase() === "active")) {
-    throw new Error("Selected section does not exist or is inactive.");
+  const lock = LockService.getScriptLock();
+  const ownsLock = !lock.hasLock();
+  if (ownsLock) lock.waitLock(10000);
+  try {
+    const existing = sheetToObjects(sheet);
+    const existingStudent = existing.find(student => String(student.StudentID) === String(payload.StudentID));
+    if (existingStudent) {
+      const sameRequest = String(existingStudent.LastName) === String(payload.LastName) &&
+        String(existingStudent.FirstName) === String(payload.FirstName) &&
+        String(existingStudent.SectionID) === String(payload.SectionID) &&
+        String(existingStudent.UserID || "") === String(payload.UserID || "");
+      if (sameRequest) return existingStudent;
+      throw new Error("Student ID already exists.");
+    }
+    const sections = sheetToObjects(getSheet(SHEETS.SECTIONS));
+    if (!sections.some(sec => String(sec.SectionID) === String(payload.SectionID) && String(sec.Status || "Active").toLowerCase() === "active")) {
+      throw new Error("Selected section does not exist or is inactive.");
+    }
+    const record = {
+      StudentID: payload.StudentID,
+      LastName: payload.LastName,
+      FirstName: payload.FirstName,
+      MiddleName: payload.MiddleName || "",
+      Gender: payload.Gender || "",
+      DateOfBirth: payload.DateOfBirth || "",
+      ContactNumber: payload.ContactNumber || "",
+      Address: payload.Address || "",
+      SectionID: payload.SectionID,
+      Status: "Active",
+      UserID: payload.UserID || "",
+      CreatedAt: nowIso(),
+      UpdatedAt: nowIso()
+    };
+    appendRow(sheet, getHeaders(sheet), record);
+    logActivity("system", "ADD_STUDENT", "Added student " + record.StudentID);
+    return record;
+  } finally {
+    if (ownsLock) lock.releaseLock();
   }
-  const record = {
-    StudentID: payload.StudentID,
-    LastName: payload.LastName,
-    FirstName: payload.FirstName,
-    MiddleName: payload.MiddleName || "",
-    Gender: payload.Gender || "",
-    DateOfBirth: payload.DateOfBirth || "",
-    ContactNumber: payload.ContactNumber || "",
-    Address: payload.Address || "",
-    SectionID: payload.SectionID,
-    Status: "Active",
-    CreatedAt: nowIso(),
-    UpdatedAt: nowIso()
-  };
-  appendRow(sheet, getHeaders(sheet), record);
-  logActivity("system", "ADD_STUDENT", "Added student " + record.StudentID);
-  return record;
 }
 function actionUpdateStudent(payload) {
   const sheet = getSheet(SHEETS.STUDENTS);
@@ -365,22 +432,31 @@ function actionAddSection(payload) {
   const gradeLevel = String(payload.GradeLevel || "").trim();
   const sectionName = String(payload.SectionName || "").trim();
   if (!gradeLevel || !sectionName) throw new Error("Grade level and section name are required.");
-  const existing = sheetToObjects(sheet);
-  const dup = existing.some(s =>
-    String(s.GradeLevel).toLowerCase() === gradeLevel.toLowerCase() &&
-    String(s.SectionName).toLowerCase() === sectionName.toLowerCase());
-  if (dup) throw new Error("This section already exists.");
-  const record = {
-    SectionID: newId("sec"),
-    SectionName: sectionName,
-    GradeLevel: gradeLevel,
-    Status: "Active",
-    CreatedAt: nowIso(),
-    UpdatedAt: nowIso()
-  };
-  appendRow(sheet, getHeaders(sheet), record);
-  logActivity("system", "ADD_SECTION", "Added section " + record.GradeLevel + "-" + record.SectionName);
-  return record;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const existing = sheetToObjects(sheet);
+    const duplicate = existing.find(section =>
+      String(section.GradeLevel).toLowerCase() === gradeLevel.toLowerCase() &&
+      String(section.SectionName).toLowerCase() === sectionName.toLowerCase());
+    if (duplicate) {
+      if (String(duplicate.Status || "Active").toLowerCase() === "active") return duplicate;
+      throw new Error("An archived section with this grade and name already exists.");
+    }
+    const record = {
+      SectionID: newId("sec"),
+      SectionName: sectionName,
+      GradeLevel: gradeLevel,
+      Status: "Active",
+      CreatedAt: nowIso(),
+      UpdatedAt: nowIso()
+    };
+    appendRow(sheet, getHeaders(sheet), record);
+    logActivity("system", "ADD_SECTION", "Added section " + record.GradeLevel + "-" + record.SectionName);
+    return record;
+  } finally {
+    lock.releaseLock();
+  }
 }
 function actionUpdateSection(payload) {
   const sheet = getSheet(SHEETS.SECTIONS);
@@ -513,4 +589,154 @@ function actionUpdateSettings(payload) {
   }
   const settingId = rows[0].SettingID;
   return updateRowByKey(sheet, "SettingID", settingId, updates);
+}
+
+// ---------- STUDENT ACCOUNTS AND ENROLLMENT REQUESTS ----------
+function actionGetAdminUsers() {
+  return sheetToObjects(getSheet(SHEETS.USERS)).map(user => ({
+    UserID: user.UserID,
+    Username: user.Username,
+    Role: user.Role,
+    Status: user.Status,
+    StudentID: user.StudentID || "",
+    CreatedAt: user.CreatedAt
+  }));
+}
+
+function actionGetEnrollmentRequests() {
+  return sheetToObjects(getSheet(SHEETS.REQUESTS));
+}
+
+function actionSubmitEnrollment(payload, session) {
+  const userId = session.userId;
+  const requestsSheet = getSheet(SHEETS.REQUESTS);
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const existing = sheetToObjects(requestsSheet).filter(request => String(request.UserID) === String(userId));
+    if (existing.some(request => request.Status === "Pending" || request.Status === "Approved")) {
+      throw new Error("You already have a pending or approved enrollment request.");
+    }
+    const record = {
+      RequestID: newId("req"), UserID: userId,
+      StudentID: String(payload.StudentID || "").trim(),
+      LastName: String(payload.LastName || "").trim(), FirstName: String(payload.FirstName || "").trim(),
+      MiddleName: String(payload.MiddleName || "").trim(), Gender: String(payload.Gender || "").trim(),
+      DateOfBirth: String(payload.DateOfBirth || "").trim(), ContactNumber: String(payload.ContactNumber || "").trim(),
+      Address: String(payload.Address || "").trim(), Status: "Pending", SectionID: "",
+      SubmittedAt: nowIso(), ReviewedAt: "", ReviewedBy: "", AdminNotes: ""
+    };
+    if (!record.LastName || !record.FirstName || !record.Gender) throw new Error("Last name, first name, and gender are required.");
+    const limits = { StudentID: 40, LastName: 80, FirstName: 80, MiddleName: 80, ContactNumber: 40, Address: 200 };
+    Object.keys(limits).forEach(field => {
+      if (record[field].length > limits[field]) throw new Error(field + " is too long.");
+    });
+    if (["Male", "Female", "Prefer not to say"].indexOf(record.Gender) === -1) throw new Error("Choose a valid gender option.");
+    appendRow(requestsSheet, getHeaders(requestsSheet), record);
+    logActivity(userId, "SUBMIT_ENROLLMENT", "Submitted enrollment request " + record.RequestID);
+    return record;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function actionGetStudentDashboard(session) {
+  const student = sheetToObjects(getSheet(SHEETS.STUDENTS)).find(item => String(item.UserID) === String(session.userId)) || null;
+  const requests = sheetToObjects(getSheet(SHEETS.REQUESTS))
+    .filter(request => String(request.UserID) === String(session.userId))
+    .sort((a, b) => String(b.SubmittedAt).localeCompare(String(a.SubmittedAt)));
+  const announcements = student
+    ? sheetToObjects(getSheet(SHEETS.ANNOUNCEMENTS)).filter(item => String(item.SectionID) === String(student.SectionID))
+      .sort((a, b) => String(a.ScheduleDate).localeCompare(String(b.ScheduleDate)))
+    : [];
+  const section = student ? sheetToObjects(getSheet(SHEETS.SECTIONS)).find(item => String(item.SectionID) === String(student.SectionID)) || null : null;
+  return { student: student, request: requests[0] || null, section: section, announcements: announcements };
+}
+
+function actionReviewEnrollmentRequest(payload, session) {
+  const requestId = String(payload.RequestID || "").trim();
+  const decision = String(payload.Decision || "").trim();
+  if (!requestId || !["Approve", "Reject"].includes(decision)) throw new Error("Choose a valid request and review decision.");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const requestsSheet = getSheet(SHEETS.REQUESTS);
+    const request = sheetToObjects(requestsSheet).find(item => String(item.RequestID) === requestId);
+    if (!request || request.Status !== "Pending") throw new Error("This enrollment request is no longer pending.");
+    let sectionId = "";
+    let studentId = "";
+    if (decision === "Approve") {
+      sectionId = String(payload.SectionID || "").trim();
+      if (!sectionId) throw new Error("Select a school section before approving.");
+      const activeSection = sheetToObjects(getSheet(SHEETS.SECTIONS)).some(item => String(item.SectionID) === sectionId && String(item.Status || "Active").toLowerCase() === "active");
+      if (!activeSection) throw new Error("Selected section does not exist or is inactive.");
+      studentId = String(request.StudentID || "").trim() || newId("stu");
+      if (sheetToObjects(getSheet(SHEETS.STUDENTS)).some(item => String(item.StudentID) === studentId)) throw new Error("That Student ID is already assigned.");
+      actionAddStudent({
+        StudentID: studentId, LastName: request.LastName, FirstName: request.FirstName,
+        MiddleName: request.MiddleName, Gender: request.Gender, DateOfBirth: request.DateOfBirth,
+        ContactNumber: request.ContactNumber, Address: request.Address, SectionID: sectionId, UserID: request.UserID
+      });
+      updateRowByKey(getSheet(SHEETS.USERS), "UserID", request.UserID, { StudentID: studentId });
+    }
+    const reviewed = updateRowByKey(requestsSheet, "RequestID", requestId, {
+      Status: decision === "Approve" ? "Approved" : "Rejected",
+      SectionID: sectionId,
+      ReviewedAt: nowIso(),
+      ReviewedBy: session.userId,
+      AdminNotes: String(payload.AdminNotes || "").trim()
+    });
+    logActivity(session.userId, "REVIEW_ENROLLMENT", decision + "d request " + requestId);
+    return { request: reviewed, StudentID: studentId };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function actionResetUserPassword(payload) {
+  const userId = String(payload.UserID || "").trim();
+  const password = String(payload.Password || "");
+  if (!userId) throw new Error("Choose a user account.");
+  if (password.length < 8 || password.length > 128) throw new Error("Password must be between 8 and 128 characters.");
+  const user = sheetToObjects(getSheet(SHEETS.USERS)).find(item => String(item.UserID) === userId);
+  if (!user || String(user.Role).toLowerCase() !== "student") throw new Error("Student account not found.");
+  updateRowByKey(getSheet(SHEETS.USERS), "UserID", userId, { PasswordHash: hashPassword(password) });
+  logActivity(userId, "PASSWORD_RESET", "Student password reset by an administrator.");
+  return { UserID: userId, Username: user.Username };
+}
+
+// ---------- SECTION ANNOUNCEMENTS ----------
+function actionGetAnnouncements() {
+  return sheetToObjects(getSheet(SHEETS.ANNOUNCEMENTS));
+}
+
+function actionSaveAnnouncement(payload) {
+  const sectionId = String(payload.SectionID || "").trim();
+  const title = String(payload.Title || "").trim();
+  const message = String(payload.Message || "").trim();
+  if (!sectionId || !title || !message || !payload.ScheduleDate) throw new Error("Section, title, announcement, and schedule date are required.");
+  if (title.length > 100 || message.length > 1000 || String(payload.Location || "").length > 100) throw new Error("Announcement details exceed the allowed length.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(String(payload.ScheduleDate))) throw new Error("Enter a valid schedule date.");
+  if (payload.StartTime && !/^\d{2}:\d{2}$/.test(String(payload.StartTime))) throw new Error("Enter a valid start time.");
+  if (payload.EndTime && !/^\d{2}:\d{2}$/.test(String(payload.EndTime))) throw new Error("Enter a valid end time.");
+  if (!sheetToObjects(getSheet(SHEETS.SECTIONS)).some(item => String(item.SectionID) === sectionId && String(item.Status || "Active").toLowerCase() === "active")) {
+    throw new Error("Selected section does not exist or is inactive.");
+  }
+  const record = {
+    AnnouncementID: newId("ann"), SectionID: sectionId, Title: title, Message: message,
+    ScheduleDate: String(payload.ScheduleDate), StartTime: String(payload.StartTime || ""),
+    EndTime: String(payload.EndTime || ""), Location: String(payload.Location || ""),
+    CreatedAt: nowIso(), UpdatedAt: nowIso()
+  };
+  appendRow(getSheet(SHEETS.ANNOUNCEMENTS), getHeaders(getSheet(SHEETS.ANNOUNCEMENTS)), record);
+  logActivity("system", "POST_ANNOUNCEMENT", "Posted announcement " + record.AnnouncementID);
+  return record;
+}
+
+function actionRemoveAnnouncement(payload) {
+  const id = String(payload.AnnouncementID || "").trim();
+  const rowNumber = findRowIndexByKey(getSheet(SHEETS.ANNOUNCEMENTS), "AnnouncementID", id);
+  if (!id || rowNumber === -1) throw new Error("Announcement not found.");
+  getSheet(SHEETS.ANNOUNCEMENTS).deleteRow(rowNumber);
+  return { Removed: true };
 }
