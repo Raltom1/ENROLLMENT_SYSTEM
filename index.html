@@ -20,10 +20,12 @@
       <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn"><span class="btn-label">Login</span><span class="spinner" hidden></span></button>
       <p id="login-error" class="form-error" hidden></p>
     </form>
+    <button class="link-btn signup-open-btn" id="open-signup-btn" type="button">Create student account</button>
     <button class="link-btn" id="open-privacy-from-login" type="button">Privacy &amp; Cookie Policy</button>
   </div>
 </section>
-<div class="modal-overlay" id="modal-privacy" hidden><div class="modal modal-lg"><div class="modal-header"><h3>Privacy &amp; Cookie Policy</h3><button class="icon-btn modal-close" data-close="modal-privacy">X</button></div><div class="modal-body" id="privacy-modal-content"></div></div></div>
+<div class="modal-overlay" id="modal-privacy" hidden><div class="modal modal-lg"><div class="modal-header"><h3>Privacy &amp; Cookie Policy</h3><button class="icon-btn modal-close" data-close="modal-privacy" aria-label="Close"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="modal-body" id="privacy-modal-content"></div></div></div>
+<div class="modal-overlay" id="modal-signup" hidden><div class="modal modal-sm"><div class="modal-header"><h3>Create student account</h3><button class="icon-btn modal-close" data-close="modal-signup" aria-label="Close"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><form class="modal-body" id="signup-form"><p class="muted signup-intro">Your account lets you submit an enrollment form and follow its status.</p><label class="field"><span>Username</span><input id="signup-username" required minlength="3" maxlength="30" autocomplete="username" /></label><label class="field"><span>Password</span><input id="signup-password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" /></label><label class="field"><span>Confirm password</span><input id="signup-confirm-password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" /></label><p id="signup-error" class="form-error" hidden></p><div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="modal-signup">Cancel</button><button type="submit" class="btn btn-primary"><span class="btn-label">Create account</span><span class="spinner" hidden></span></button></div></form></div></div>
 <script>window.IS_LOGIN_PAGE = true;</script><script src="script.js"></script>
 </body>
 </html>
