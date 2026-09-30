@@ -1,8 +1,8 @@
 /**
  * ==============================================================
  * SCHOOL ENROLLMENT AND GRADING MANAGEMENT SYSTEM — BACKEND
- * Google Apps Script (Code.gs)
- *
+ * Google Apps Script (Code.gs) 
+ * https://docs.google.com/spreadsheets/d/1UMKyZf4VueHlbaadW68e0bQAUpRV63lFa71v7CynaX8/edit?gid=766278601#gid=766278601
  * This script is the ONLY thing that talks to the Google Sheets
  * spreadsheet. The frontend never touches the sheet directly.
  * Deploy this as a Web App (Execute as: Me, Access: Anyone)
