@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Student Dashboard</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+<div id="student-app-shell" class="app-shell" hidden>
+  <aside id="student-sidebar" class="sidebar">
+    <div class="sidebar-header"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16c0 1.7 2.7 3 6 3s6-1.3 6-3v-5.4"/></svg><span id="student-school-title">Student Portal</span></div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-student-page="overview"><span>Overview</span></button>
+      <button class="nav-item" data-student-page="enrollment"><span>My Enrollment</span></button>
+      <button class="nav-item" data-student-page="announcements"><span>Schedule &amp; Announcements</span></button>
+      <button class="nav-item nav-item-logout" id="student-logout-btn"><span>Log out</span></button>
+    </nav>
+  </aside>
+  <div id="student-sidebar-overlay" class="sidebar-overlay"></div>
+  <div class="main-area">
+    <header class="topbar"><button id="student-menu-btn" class="icon-btn" aria-label="Toggle menu"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><h2 id="student-topbar-title">Overview</h2><div class="topbar-right"><span class="student-account-label" id="student-account-label"></span></div></header>
+    <main class="content student-content">
+      <section class="page active" id="student-page-overview">
+        <div class="student-welcome"><p class="eyebrow-label">STUDENT PORTAL</p><h1 id="student-welcome-name">Welcome</h1><p id="student-welcome-subtitle">Your enrollment and school schedule, in one place.</p></div>
+        <div class="student-overview-grid">
+          <section class="student-status-panel"><div class="panel-heading"><div><p class="stat-label">ENROLLMENT STATUS</p><h2 id="student-status-title">Not submitted</h2></div><span id="student-status-badge" class="status-badge badge-info">Action needed</span></div><p id="student-status-copy">Complete your enrollment form for an administrator to review.</p><button id="start-enrollment-btn" class="btn btn-primary"><span>Submit enrollment form</span></button><div id="student-assigned-section" class="assigned-section" hidden></div></section>
+          <section class="student-next-panel"><p class="stat-label">NEXT ON YOUR SCHEDULE</p><div id="student-next-event"><p class="muted">No schedule has been announced for your section yet.</p></div><button class="text-action" data-student-page-link="announcements">View all announcements <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></section>
+        </div>
+      </section>
+      <section class="page" id="student-page-enrollment">
+        <div class="student-page-heading"><div><p class="eyebrow-label">ENROLLMENT</p><h1>My enrollment</h1></div><button id="student-enrollment-btn" class="btn btn-primary">Complete enrollment form</button></div>
+        <section id="student-enrollment-status" class="student-status-panel enrollment-status-panel"></section>
+      </section>
+      <section class="page" id="student-page-announcements">
+        <div class="student-page-heading"><div><p class="eyebrow-label">YOUR SECTION</p><h1>Schedule &amp; announcements</h1><p id="student-announcement-section" class="muted">Available after your enrollment is approved.</p></div></div>
+        <div id="student-announcements-list" class="announcement-list student-announcements-list"></div>
+        <p id="student-announcements-empty" class="empty-state">No announcements have been posted for your section.</p>
+      </section>
+    </main>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-student-enrollment" hidden><div class="modal modal-lg"><div class="modal-header"><div><p class="eyebrow-label">ENROLLMENT REQUEST</p><h3>Student information</h3></div><button class="icon-btn modal-close" data-close="modal-student-enrollment" aria-label="Close"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><form class="modal-body" id="student-enrollment-form"><p class="muted form-intro">Your requested section is not selected here. The administrator will review your information and assign a section.</p><div class="form-grid"><label class="field"><span>Student ID (if already issued)</span><input id="request-student-id" maxlength="40" /></label><label class="field"><span>Last Name</span><input id="request-last-name" required maxlength="80" /></label><label class="field"><span>First Name</span><input id="request-first-name" required maxlength="80" /></label><label class="field"><span>Middle Name</span><input id="request-middle-name" maxlength="80" /></label><label class="field"><span>Gender</span><select id="request-gender" required><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer not to say</option></select></label><label class="field"><span>Date of Birth</span><input id="request-dob" type="date" /></label><label class="field"><span>Contact Number</span><input id="request-contact" type="tel" maxlength="40" /></label><label class="field"><span>Address</span><input id="request-address" maxlength="200" /></label></div><p id="student-enrollment-error" class="form-error" hidden></p><div class="modal-footer"><button type="button" class="btn btn-ghost" data-close="modal-student-enrollment">Cancel</button><button type="submit" class="btn btn-primary"><span class="btn-label">Submit for review</span><span class="spinner" hidden></span></button></div></form></div></div>
+<div class="loading-overlay" id="student-logout-loading" hidden><div class="loading-dialog"><span class="loading-spinner"></span><p>Signing you out</p></div></div>
+<script>window.IS_STUDENT_PAGE = true;</script><script src="script.js"></script>
+</body>
+</html>
