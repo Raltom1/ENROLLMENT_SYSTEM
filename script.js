@@ -207,7 +207,7 @@ const Auth = {
       else window.location.href = session.role === "Admin" ? "admin.html" : "student.html";
     } else {
       Store.remove("session");
-      if (window.IS_ADMIN_PAGE || window.IS_STUDENT_PAGE) window.location.href = "Index.html";
+      if (window.IS_ADMIN_PAGE || window.IS_STUDENT_PAGE) window.location.href = "index.html";
       else App.showLogin();
     }
     const loginForm = document.getElementById("login-form");
