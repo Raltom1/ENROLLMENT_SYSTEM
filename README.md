@@ -3,16 +3,31 @@
 
 ## What is this system?
 
-This system is used by an **Administrator** to:
+This system supports **Administrators** and **Students**.
+
+Administrators can:
 
 - add and edit students
+- approve or reject enrollment requests
 - manage school sections
 - transfer students between sections
-- enter grades
+- enter and save grades
+- publish section announcements and schedules
 - update school settings
 - view dashboard statistics
+- reset a student's password when needed
 
-**Important:** Only Admin users can log in. There is no public student registration. Students are added by the Admin from the dashboard.
+Students can:
+
+- create an account
+- sign in to the student portal
+- submit an enrollment form
+- track approval status
+- view their assigned section
+- view section announcements for their class
+- see a clear status update after approval
+
+The system includes section loading feedback, custom logout confirmation, and role-based access so Student and Admin actions stay separate.
 
 ---
 
@@ -23,13 +38,20 @@ Make sure these files are in the same folder:
 ```text
 index.html
 admin.html
+student.html
 script.js
 style.css
 Code-1.gs
+build_presentation.js
+build_presentation.ps1
+presentation_print.html
+presentation_assets/
 README.md
 ```
 
-Do not separate `index.html`, `admin.html`, `script.js`, and `style.css`. They must stay together for the login page and dashboard to work.
+Do not separate `index.html`, `admin.html`, `student.html`, `script.js`, and `style.css`. They must stay together for the login page and dashboards to work.
+
+The presentation files are optional but are included for the project slide deck and print-ready version.
 
 ---
 
@@ -127,6 +149,8 @@ Sections
 Grades
 Settings
 ActivityLogs
+EnrollmentRequests
+Announcements
 ```
 
 It also adds the required headers to each sheet.
@@ -158,7 +182,7 @@ admin
 7. Enter:
 
 ```text
-admin12345
+admin@123
 ```
 
 8. Click **OK**.
@@ -265,10 +289,10 @@ Enter:
 
 ```text
 Username: admin
-Password: admin12345
+Password: admin@123
 ```
 
-After a successful login, the system automatically opens the Admin dashboard in `admin.html`.
+After a successful login, Admin accounts open `admin.html` and Student accounts open `student.html`.
 
 ## If you are using GitHub Pages
 
@@ -316,9 +340,43 @@ Do not add `Index.html` to the URL. GitHub Pages will automatically load the low
 |---|---|
 | `index.html` | Login page only |
 | `admin.html` | Protected Admin dashboard |
-| `script.js` | Frontend logic and API connection |
-| `style.css` | Design and responsive layout |
-| `Code-1.gs` | Backend and Google Sheets connection |
+| `student.html` | Protected student dashboard |
+| `script.js` | Frontend logic, UI flows, login/logout logic, section actions, API calls |
+| `style.css` | Design, responsive layout, modal styling, loader states |
+| `Code-1.gs` | Backend, Google Sheets logic, validations, role checks |
+| `build_presentation.js` | Slide generation for the PowerPoint deck |
+| `build_presentation.ps1` | PowerPoint/PDF export helper |
+| `presentation_print.html` | Browser-friendly 14-slide print version |
+| `presentation_assets/` | Presentation images and screenshots |
+| `README.md` | Setup and usage instructions |
+
+## Project presentation
+
+The presentation covers student signup and enrollment, admin request approval, section assignment, section announcements, the student schedule view, section loading feedback, and the admin logout dialog. Its screenshots use anonymized demonstration records.
+
+To rebuild the PowerPoint after changing slide content or screenshots, run:
+
+```powershell
+node build_presentation.js
+```
+
+The generated file is:
+
+```text
+SEMS_Project_Presentation.pptx
+```
+
+`presentation_print.html` is the matching browser/print version. Open it in a browser and use **Print → Save as PDF** for a printable PDF.
+
+The presentation deck includes the following updated topics:
+
+- student account registration
+- student enrollment form flow
+- admin review and approval queue
+- section assignment and archive logic
+- section announcements and student dashboard schedule
+- SVG loading states for section actions
+- custom logout confirmation popup
 
 ---
 
@@ -407,13 +465,14 @@ Do these steps every time you change the backend:
 
 1. Copy the updated `Code-1.gs` into `Code.gs` in Apps Script.
 2. Click **Save**.
-3. Click **Deploy**.
-4. Select **Manage deployments**.
-5. Click the pencil **Edit** icon.
-6. Under **Version**, select **New version**.
-7. Click **Deploy**.
-8. Keep using the same Web app URL.
-9. Refresh the browser with `Ctrl + F5`.
+3. Run `setupSpreadsheet` once after updating this version. It creates the new `EnrollmentRequests` and `Announcements` sheets and adds the new `StudentID` and `UserID` columns without removing existing data.
+4. Click **Deploy**.
+5. Select **Manage deployments**.
+6. Click the pencil **Edit** icon.
+7. Under **Version**, select **New version**.
+8. Click **Deploy**.
+9. Keep using the same Web app URL.
+10. Refresh the browser with `Ctrl + F5`.
 
 If you do not create a new version, the website may continue using the old backend code.
 
@@ -496,7 +555,7 @@ Use this checklist after setup:
 
 - [ ] `index.html` opens as the login page.
 - [ ] Admin login works.
-- [ ] The system opens `admin.html` after login.
+- [ ] Admin login opens `admin.html`; Student login opens `student.html`.
 - [ ] The dashboard cannot be opened without login.
 - [ ] The Dashboard loads.
 - [ ] A student can be added.
@@ -509,7 +568,13 @@ Use this checklist after setup:
 - [ ] Grades below 0 or above 100 are rejected.
 - [ ] Settings can be saved.
 - [ ] Logout works.
-- [ ] Non-Admin users cannot log in.
+- [ ] Student accounts cannot access Admin-only actions.
+- [ ] A student can create an account and log in to the student dashboard.
+- [ ] A student can submit an enrollment request without selecting a section.
+- [ ] An Admin can approve or reject a request and assign a section on approval.
+- [ ] Students see only announcements for their assigned section.
+- [ ] Admin user, section, and grading searches work.
+- [ ] Admin can reset a student password.
 
 ---
 
