@@ -1301,7 +1301,7 @@ const StudentApp = {
     this.refreshTimer = null;
     STATE.session = null;
     Store.remove("session");
-    window.location.href = "Index.html";
+    window.location.href = "index.html";
   }
 };
 
