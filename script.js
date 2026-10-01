@@ -299,7 +299,7 @@ const Auth = {
     STATE.session = null;
     Store.remove("session");
     Polling.stop();
-    if (window.IS_ADMIN_PAGE || window.IS_STUDENT_PAGE) window.location.href = "Index.html";
+    if (window.IS_ADMIN_PAGE || window.IS_STUDENT_PAGE) window.location.href = "index.html";
   }
 };
 
